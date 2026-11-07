@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "Utang & Bills Tracker",
+    "slug": "utang-and-bills-tracker",
+    "version": "0.1.0",
+    "scheme": "utangtracker",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": false,
+    "splash": {
+      "backgroundColor": "#FAF9F5"
+    },
+    "android": {
+      "package": "com.vince.utangbillstracker",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#E8D558"
+      },
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "utangtracker",
+              "host": "auth",
+              "pathPrefix": "/callback"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.vince.utangbillstracker"
+    }
+  }
+}

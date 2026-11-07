@@ -1,0 +1,78 @@
+name: Build Android APK (v0.1 Beta)
+
+on:
+  push:
+    branches: [ main, master ]
+    tags: [ 'v*' ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    name: Build & Release Android APK v0.1
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Prebuild Android native project
+        env:
+          CI: "1"
+        run: npx expo prebuild --platform android --clean
+
+      - name: Build Standalone Release APK
+        working-directory: ./android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+
+      - name: Rename APK to Utang-and-Bills-Tracker-v0.1.apk
+        run: |
+          cp android/app/build/outputs/apk/release/app-release.apk Utang-and-Bills-Tracker-v0.1.apk
+
+      - name: Upload APK as Workflow Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Utang-and-Bills-Tracker-v0.1-APK
+          path: Utang-and-Bills-Tracker-v0.1.apk
+
+      - name: Publish APK to GitHub Release v0.1
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v0.1
+          name: "Utang & Bills Tracker v0.1 (Beta APK)"
+          body: |
+            ## Utang & Bills Tracker — Version 0.1 (Beta)
+            Download **`Utang-and-Bills-Tracker-v0.1.apk`** below to install on any Android device.
+
+            ### Included in v0.1 Beta:
+            - **Hybrid Offline-First + Supabase Cloud Sync** (`profiles`, `loans`, `bills`, `payment_history`)
+            - **Google OAuth Sign-In (`utangtracker://auth/callback`)** & Email/Password Auth
+            - **Full-Scale `UTANG` Screen** with Category Dropdown (`DEADLINES`, `ALL UTANG`, `DUE DATES`, `NO DUE DATE`, `TERMS`) and Context-Aware Month/Term Filter
+            - **Notes on Every Action** (creating loans, paying installments/partial loans, creating & paying bills)
+            - **Reversible Paid States** with confirmation modals across Loans, Bills, Full Loan Details, and History
+            - **Bills Enhancements** (`other` placeholder icon + `no due date / anytime` monthly option)
+          files: Utang-and-Bills-Tracker-v0.1.apk
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
